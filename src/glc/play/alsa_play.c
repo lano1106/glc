@@ -196,7 +196,7 @@ int alsa_play_hw(alsa_play_t alsa_play, glc_audio_format_message_t *fmt_msg)
 	snd_pcm_access_t access;
 	unsigned int period_time;
 	unsigned int buffer_time;
-	int dir = 0, ret = 0;
+	int ret = 0;
 
 	if (unlikely(fmt_msg->id != alsa_play->id))
 		return 0;

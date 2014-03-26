@@ -59,8 +59,8 @@
 #define MAIN_COMPRESS_LZJB        0x40
 #define MAIN_START                0x80
 
-#define SINK_CB_RELOAD_ARG         0x1
-#define SINK_CB_STOP_ARG           0x2
+#define SINK_CB_RELOAD_ARG         (void *)0x1
+#define SINK_CB_STOP_ARG           (void *)0x2
 
 struct main_private_s {
 	glc_t glc;
@@ -107,7 +107,7 @@ static void stream_sink_callback(void *arg);
 static int open_stream();
 static int close_stream();
 static int reload_stream();
-static int send_cb_request(int req_arg);
+static int send_cb_request(void *req_arg);
 static int start_capture_impl();
 
 void init_glc()
@@ -324,11 +324,9 @@ void stream_sink_callback(void *arg)
 {
 	/* this is called when callback request arrives to file object */
 	int ret;
-	int req_arg = (int)arg;
 
-	switch(req_arg)
+	if (arg == SINK_CB_RELOAD_ARG)
 	{
-	case SINK_CB_RELOAD_ARG:
 		glc_log(&mpriv.glc, GLC_INFO, "main", "reloading stream");
 
 		if (unlikely((ret = mpriv.sink->ops->write_eof(mpriv.sink))))
@@ -339,30 +337,31 @@ void stream_sink_callback(void *arg)
 			goto err;
 		if (unlikely((ret = mpriv.sink->ops->write_state(mpriv.sink))))
 			goto err;
-		break;
-	case SINK_CB_STOP_ARG:
+	}
+	else if (arg == SINK_CB_STOP_ARG)
+	{
 		glc_log(&mpriv.glc, GLC_INFO, "main", "stopping stream");
 		if (unlikely((ret = mpriv.sink->ops->write_eof(mpriv.sink))))
 			goto err;
-		break;
-	default:
+	}
+	else
+	{
 		glc_log(&mpriv.glc, GLC_ERROR, "main",
-			"unknown stream_sink_cb arg value: %d", req_arg);
-		break;
+			"unknown stream_sink_cb arg value: %p", arg);
 	}
 	return;
 err:
 	glc_log(&mpriv.glc, GLC_ERROR, "main",
-		"error during stream sink cb (%d): %s (%d)\n",
-		req_arg, strerror(ret), ret);
+		"error during stream sink cb (%p): %s (%d)\n",
+		arg, strerror(ret), ret);
 }
 
-int send_cb_request(int req_arg)
+int send_cb_request(void *req_arg)
 {
 	glc_message_header_t hdr;
 	hdr.type = GLC_CALLBACK_REQUEST;
 	glc_callback_request_t callback_req;
-	callback_req.arg = (void*)req_arg;
+	callback_req.arg = req_arg;
 
 	/* synchronize with opengl top buffer */
 	return opengl_push_message(&hdr, &callback_req,
@@ -402,7 +401,7 @@ int reload_capture()
 	return start_capture_impl();
 }
 
-int start_capture()
+void start_capture()
 {
 	if (mpriv.sink && !mpriv.sink->ops->can_resume(mpriv.sink))
 		reload_capture();

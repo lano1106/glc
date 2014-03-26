@@ -31,6 +31,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <inttypes.h>
 #include <packetstream.h>
 #include <errno.h>
 
@@ -344,7 +345,7 @@ void video_frame_info(info_t info, glc_video_frame_header_t *pic_header)
 		fprintf(info->stream, "picture\n");
 
 		fprintf(info->stream, "  stream id   = %d\n", pic_header->id);
-		fprintf(info->stream, "  time        = %lu\n", pic_header->time);
+		fprintf(info->stream, "  time        = %" PRIu64 "\n", pic_header->time);
 		fprintf(info->stream, "  size        = %ux%u\n", video->w, video->h);
 	} else if (info->level >= INFO_PICTURE) {
 		print_time(info->stream, info->time);
@@ -420,8 +421,8 @@ void audio_data_info(info_t info, glc_audio_data_header_t *audio_header)
 		print_time(info->stream, info->time);
 		fprintf(info->stream, "audio packet\n");
 		fprintf(info->stream, "  stream id   = %d\n", audio_header->id);
-		fprintf(info->stream, "  time        = %lu\n", audio_header->time);
-		fprintf(info->stream, "  size        = %ld\n", audio_header->size);
+		fprintf(info->stream, "  time        = %" PRIu64 "\n", audio_header->time);
+		fprintf(info->stream, "  size        = %" PRIu64 "\n", audio_header->size);
 	} else if (info->level >= INFO_AUDIO) {
 		print_time(info->stream, info->time);
 		fprintf(info->stream, "audio packet (stream %d)\n", audio_header->id);

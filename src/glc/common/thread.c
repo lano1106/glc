@@ -37,6 +37,7 @@
 #include <errno.h>
 
 #include "glc.h"
+#include "core.h"
 #include "thread.h"
 #include "util.h"
 #include "log.h"

@@ -33,6 +33,9 @@
 
 #include "optimization.h"
 
+/* Prototype __libc_allocate_rtsig() to avoid an implicit declaration. */
+extern int __libc_allocate_rtsig(int);
+
 /** async signal number */
 static int glcs_signal_signo;
 

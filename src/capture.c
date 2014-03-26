@@ -342,7 +342,10 @@ int set_opt(struct glc_opt_s *option, const char *arg)
 			fullpath = malloc(1024);
 			fullpath[0] = '\0'; /* just to make sure */
 
-			getcwd(fullpath, 1024);
+			if (getcwd(fullpath, 1024) == NULL){
+				fprintf(stderr, "Parent directory length is too long.\n");
+				return EINVAL;
+			}
 
 			pos = strlen(fullpath);
 			len = strlen(arg);

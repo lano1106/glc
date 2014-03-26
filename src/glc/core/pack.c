@@ -34,6 +34,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <stdint.h>
+#include <inttypes.h>
 
 #include <glc/common/glc.h>
 #include <glc/common/core.h>
@@ -550,7 +551,7 @@ void print_stats(glc_t *glc, pack_stat_t *stat)
 		ratio = (double)stat->pack_size/(double)stat->unpack_size;
 
 	glc_log(glc, GLC_PERF, "pack",
-		"unpack_size: %llu pack_size: %llu %remn: %.1f",
+		"unpack_size: %" PRIu64 " pack_size: %" PRIu64 " %%remn: %.1f",
 		stat->unpack_size, stat->pack_size, ratio*100);
 }
 

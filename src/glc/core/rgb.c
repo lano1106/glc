@@ -125,8 +125,8 @@ static void rgbget_video_stream(rgb_t rgb, glc_stream_id_t id,
 		struct rgb_video_stream_s **ctx);
 
 static int rgb_video_format_message(rgb_t rgb, glc_video_format_message_t *video_format_message);
-static int rgb_convert(rgb_t rgb, struct rgb_video_stream_s *ctx,
-		unsigned char *from, unsigned char *to);
+/* static int rgb_convert(rgb_t rgb, struct rgb_video_stream_s *ctx,
+		unsigned char *from, unsigned char *to); */
 
 static int rgb_init_lookup(rgb_t rgb);
 static int rgb_convert_lookup(rgb_t rgb, struct rgb_video_stream_s *ctx,
@@ -282,6 +282,7 @@ int rgb_video_format_message(rgb_t rgb, glc_video_format_message_t *video_format
 	return 0;
 }
 
+#ifdef FALSE
 int rgb_convert(rgb_t rgb, struct rgb_video_stream_s *video,
 		unsigned char *from, unsigned char *to)
 {
@@ -315,6 +316,7 @@ int rgb_convert(rgb_t rgb, struct rgb_video_stream_s *video,
 #undef CONVERT
 	return 0;
 }
+#endif
 
 int rgb_init_lookup(rgb_t rgb)
 {

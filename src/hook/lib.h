@@ -66,7 +66,7 @@ __PRIVATE void init_glc();
 __PRIVATE int start_glc();
 __PRIVATE void get_real_dlsym();
 __PRIVATE void *wrapped_func(const char *symbol);
-__PRIVATE int start_capture();
+__PRIVATE void start_capture();
 __PRIVATE int reload_capture();
 __PRIVATE int stop_capture();
 /**  \} */

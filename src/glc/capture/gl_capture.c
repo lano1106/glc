@@ -38,6 +38,7 @@
 #include <GL/glx.h>
 #include <GL/glext.h>
 #include <unistd.h>
+#include <inttypes.h>
 #include <packetstream.h>
 #include <pthread.h>
 #include <dlfcn.h>
@@ -397,7 +398,7 @@ int gl_capture_destroy(gl_capture_t gl_capture)
 		gl_capture->video = gl_capture->video->next;
 
 		glc_log(gl_capture->glc, GLC_PERF, "gl_capture",
-			"captured %u frames in %llu nsec",
+			"captured %u frames in %" PRIu64 " nsec",
 			del->num_frames, del->capture_time_ns);
 
 		/* we might be in wrong thread */
@@ -767,7 +768,6 @@ int gl_capture_update_video_stream(gl_capture_t gl_capture,
 			  struct gl_capture_video_stream_s *video)
 {
 	unsigned int w, h;
-	int ret;
 
 	/* initialize PBO if not already done */
 	if ((!(gl_capture->flags & GL_CAPTURE_USE_PBO)) &&
@@ -813,7 +813,7 @@ int gl_capture_frame(gl_capture_t gl_capture, Display *dpy, GLXDrawable drawable
 	glc_message_header_t msg;
 	glc_video_frame_header_t pic;
 	glc_utime_t now;
-	glc_utime_t before_capture,after_capture;
+	glc_utime_t before_capture = 0, after_capture = 0;
 	char *dma;
 	int ret = 0;
 

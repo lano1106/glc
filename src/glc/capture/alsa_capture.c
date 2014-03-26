@@ -34,6 +34,8 @@
 #include <unistd.h>
 #include <errno.h>
 #include <sched.h>
+#include <pthread.h>
+#include <inttypes.h>
 #include <packetstream.h>
 #include <alsa/asoundlib.h>
 
@@ -145,7 +147,9 @@ int alsa_capture_destroy(alsa_capture_t alsa_capture)
 	alsa_capture->stop_capture = 1;
 
 	if (alsa_capture->thread.running) {
-		write(alsa_capture->interrupt_pipe[1],"",1);
+		if (unlikely(write(alsa_capture->interrupt_pipe[1],"",1) != 1))
+			glc_log(alsa_capture->glc, GLC_WARN, "alsa_capture",
+			 "unable to write to the interrupt pipe");
 		pthread_join(alsa_capture->thread.thread, NULL);
 		alsa_capture->thread.running = 0;
 	}
@@ -193,7 +197,6 @@ int alsa_capture_set_channels(alsa_capture_t alsa_capture, unsigned int channels
 
 int alsa_capture_start(alsa_capture_t alsa_capture)
 {
-	int ret;
 	if (unlikely(alsa_capture == NULL))
 		return EINVAL;
 
@@ -201,7 +204,9 @@ int alsa_capture_start(alsa_capture_t alsa_capture)
 		return EAGAIN;
 
 	if (!alsa_capture->thread.running) {
-		pipe(alsa_capture->interrupt_pipe);
+		if (unlikely(pipe(alsa_capture->interrupt_pipe) != 0))
+			glc_log(alsa_capture->glc, GLC_WARN, "alsa_capture",
+			 "pipe() did not succeed.");
 		glc_util_set_nonblocking(alsa_capture->interrupt_pipe[0]);
 		glc_simple_thread_create(alsa_capture->glc,
 					&alsa_capture->thread,
@@ -212,7 +217,9 @@ int alsa_capture_start(alsa_capture_t alsa_capture)
 		glc_log(alsa_capture->glc, GLC_INFO, "alsa_capture",
 			 "starting device %s", alsa_capture->device);
 		alsa_capture->skip_data = 0;
-		write(alsa_capture->interrupt_pipe[1],"",1);
+		if (unlikely(write(alsa_capture->interrupt_pipe[1],"",1) != 1))
+			glc_log(alsa_capture->glc, GLC_WARN, "alsa_capture",
+			 "unable to write to the interrupt pipe");
 	} else
 		glc_log(alsa_capture->glc, GLC_WARN, "alsa_capture",
 			 "device %s already started", alsa_capture->device);
@@ -229,7 +236,9 @@ int alsa_capture_stop(alsa_capture_t alsa_capture)
 		glc_log(alsa_capture->glc, GLC_INFO, "alsa_capture",
 			 "stopping device %s", alsa_capture->device);
 		alsa_capture->skip_data = 1;
-		write(alsa_capture->interrupt_pipe[1],"",1);
+		if (unlikely(write(alsa_capture->interrupt_pipe[1], "", 1) != 1))
+			glc_log(alsa_capture->glc, GLC_WARN, "alsa_capture",
+			 "unable to write to the interrupt pipe");
 	} else
 		glc_log(alsa_capture->glc, GLC_WARN, "alsa_capture",
 			 "device %s already stopped", alsa_capture->device);
@@ -409,7 +418,7 @@ int alsa_capture_init_hw(alsa_capture_t alsa_capture, snd_pcm_hw_params_t *hw_pa
 		goto err;
 
 	glc_log(alsa_capture->glc, GLC_INFO, "alsa_capture",
-		"buffer size: %d num periods: %d period len %u usec", max_buffer_size,
+		"buffer size: %lu num periods: %d period len %u usec", max_buffer_size,
 		alsa_capture->min_periods, period_time);
 err:
 	return -ret;
@@ -553,7 +562,7 @@ int alsa_capture_read_pcm(alsa_capture_t alsa_capture, char *dma)
 			dma    += r * alsa_capture->bytes_per_frame;
 			if (unlikely(count))
 				glc_log(alsa_capture->glc, GLC_WARN, "alsa_capture",
-					"read %ld, expected %zd",
+					"read %zd, expected %" PRIu64,
 				 	r * alsa_capture->bytes_per_frame,
 				 	alsa_capture->hdr.size);
 		}

@@ -29,6 +29,7 @@
 #include <errno.h>
 #include <signal.h>
 #include <time.h>
+#include <sys/wait.h>
 #include <sys/epoll.h>
 
 #include <glc/common/state.h>

@@ -290,7 +290,9 @@ int file_set_target(struct file_private_s *mpriv, int fd)
 
 	/* truncate file when we have locked it */
 	lseek(fd, 0, SEEK_SET);
-	ftruncate(fd, 0);
+	if (unlikely(ftruncate(fd, 0) != 0))
+		glc_log(mpriv->glc, GLC_WARN, "file", "ftruncate error: %s (%d)",
+			strerror(errno), errno);
 
 	mpriv->handle = fdopen(fd, "w");
 	if (unlikely(!mpriv->handle)) {

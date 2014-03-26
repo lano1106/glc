@@ -106,8 +106,6 @@ int copy_add(copy_t copy, ps_buffer_t *target, glc_message_type_t type)
 
 int copy_process_start(copy_t copy, ps_buffer_t *from)
 {
-	int ret;
-
 	if (unlikely(copy->thread.running))
 		return EALREADY;
 

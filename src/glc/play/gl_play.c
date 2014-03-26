@@ -110,8 +110,6 @@ static int gl_play_destroy_textures(gl_play_t gl_play);
 
 static int gl_play_draw_video_frame_messageture(gl_play_t gl_play, char *from);
 
-static int gl_play_handle_xevents(gl_play_t gl_play, glc_thread_state_t *state);
-
 static int gl_play_next_texture_size(gl_play_t gl_play, unsigned int number);
 
 int gl_play_init(gl_play_t *gl_play, glc_t *glc)
